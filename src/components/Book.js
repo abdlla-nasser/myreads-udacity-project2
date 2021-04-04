@@ -1,7 +1,8 @@
 import React from "react";
 import { BookOptions } from "./BookOptions";
 
-export const Book = ({ book, setShelves, shelves, shelf }) => {
+export const Book = ({ book, setShelves, shelves, bookShelf }) => {
+  const { imageLinks , shelf, title, author } = book;
   return (
     <li>
       <div className="book">
@@ -11,15 +12,22 @@ export const Book = ({ book, setShelves, shelves, shelf }) => {
             style={{
               width: 128,
               height: 174,
-              backgroundImage: `url(${book.cover ? book.cover : book.imageLinks.thumbnail})`,
+              backgroundImage: `url(${imageLinks ? imageLinks.thumbnail : ""})`,
             }}
           />
           <div className="book-shelf-changer">
-            <BookOptions value={book.shelf} selectedOption={book.shelf} setShelves={setShelves} shelves={shelves} book={book} shelf={shelf}/>
+            <BookOptions
+              value={shelf}
+              selectedOption={shelf}
+              setShelves={setShelves}
+              shelves={shelves}
+              book={book}
+              shelf={bookShelf}
+            />
           </div>
         </div>
-        <div className="book-title">{book.title}</div>
-        <div className="book-authors">{book.author}</div>
+        <div className="book-title">{title}</div>
+        <div className="book-authors">{author}</div>
       </div>
     </li>
   );

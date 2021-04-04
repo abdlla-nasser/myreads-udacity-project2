@@ -22,6 +22,7 @@ export const shelvesOrder = (shelves) => {
   })
   return ordered
 }
+const shelvesNames = ["currentlyReading", "wantToRead", "read"];
 
 function App() {
   const [subject, setSubject] = useState(null);
@@ -29,7 +30,8 @@ function App() {
   const [books, setBooks] = useState([])
   const [searchData, setSearchData] = useState([]);
   const handleSearch = (term) => {
-    return subject ? subject.next(term) : null;
+    if(subject && term.length > 2) return subject.next(term)
+    else setSearchData([]);
   };
   useEffect(() => {
     Api.getAll().then((res) => {
@@ -40,22 +42,16 @@ function App() {
         return {
           ...book,
           author: author.substring(0, author.length - 1),
-          cover: book.imageLinks.thumbnail,
         };
       });
-      const shelvesNames = [
-        ...new Set(
-          books.reduce((acc, currVal) => {
-            return [...acc, currVal.shelf];
-          }, [])
-        ),
-      ];
       const shelves = shelvesNames.map((shelf) => {
+        const shelfBooks = books.filter((book) => book.shelf === shelf);
         return {
           title: shelf,
-          books: books.filter((book) => book.shelf === shelf),
+          books: shelfBooks ? shelfBooks : [],
         };
       });
+      console.log(shelvesOrder(shelves))
       setBooks(res)
       setShelves(shelvesOrder(shelves));
     });
@@ -68,9 +64,9 @@ function App() {
       const observable = subject
         .pipe(
           map((s) => s.trim()),
-          filter((s) => s.length >= 2),
           distinctUntilChanged(),
-          debounceTime(500),
+          debounceTime(200),
+          filter((s) => s.length >= 2),
           switchMap((term) => Api.search(term))
         )
         .subscribe(setSearchData);
@@ -86,16 +82,19 @@ function App() {
         <Route exact path="/search">
           <SearchPage
             handleSearch={handleSearch}
+            setSearchData={setSearchData}
             searchData={searchData}
             shelves={shelves}
             books={books}
             setShelves={(e) => setShelves(shelvesOrder(e))}
           />
         </Route>
-        <Route exact path="/"><Home shelves={shelves} setShelves={setShelves} /></Route>
+        <Route exact path="/">
+          <Home shelves={shelves} setShelves={setShelves} />
+        </Route>
       </Router>
     </div>
-  )
+  );
 }
 
 export default App;

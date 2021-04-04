@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { update } from "../BooksAPI";
+// const removeBook = (bookId, shelf, shelves) => {
+//   let newShelves = [...shelves];
+//   const newFromShelf = 
+//   return newShelves;
+// };
 export const BookOptions = ({
   setShelves,
   selectedOption,
@@ -10,30 +15,31 @@ export const BookOptions = ({
   const [selected, setSelected] = useState(
     selectedOption ? selectedOption : "none"
   );
-  const handleChange = (e) => {
-    if (book.shelf === e.target.value) return;
-    update(book, e.target.value).then(() => setSelected(e.target.value));
-    const newBook = { ...book, shelf: e.target.value };
-    const newFromShelf = shelf.books 
-      ? {
-          ...shelf,
-          books: [...shelf.books.filter((book) => book.id !== newBook.id)],
-        }
-      : {};
-    const toShelf = shelves.find((shelf) => shelf.title === e.target.value);
-    const newToShelf = { ...toShelf, books: [...toShelf.books, newBook] };
-    if (!shelf.books) {
-      const newShelves = shelves.filter(
-        (shelf) => shelf.title !== toShelf.title
-      );
-      setShelves([...newShelves, newToShelf]);
-    } else {
-      const newShelves = shelves.filter(
-        (shelf) =>
-          shelf.title !== newFromShelf.title && shelf.title !== toShelf.title
-      );
-      setShelves([...newShelves, newToShelf, newFromShelf]);
+  const handleChange = ({target: {value}}) => {
+    if (book.shelf === value) return;
+    update(book, value).then(() => setSelected(value));
+    console.log(shelf)
+    const newBook = { ...book, shelf: value };
+    const newFromShelf = {
+      ...shelf,
+      books: shelf.books ? [...shelf.books.filter((book) => book.id !== newBook.id)] : [],
     }
+    const toShelf = shelves.find((shelf) => shelf.title === value);
+    if (toShelf) {
+      const newToShelf = { ...toShelf, books: [...toShelf.books, newBook] };      
+      if (!shelf.books) {
+        const newShelves = shelves.filter(
+          (shelf) => shelf.title !== toShelf.title
+        );
+        setShelves([...newShelves, newToShelf]);
+      } else {
+        const newShelves = shelves.filter(
+          (shelf) =>
+            shelf.title !== newFromShelf.title && shelf.title !== toShelf.title
+        );
+        setShelves([...newShelves, newToShelf, newFromShelf]);
+      }
+    } else setShelves([...shelves.filter(shelf => shelf.title !== newFromShelf.title), newFromShelf ])
   };
   return (
     <select value={selected} onChange={handleChange}>
